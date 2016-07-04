@@ -51,8 +51,7 @@ impl Tree {
            right: Tree{t:TreeEnum::Empty} };
         self.t = TreeEnum::Node(Box::new(n));
       },
-      TreeEnum::Node(ref mut nt) => {
-        let mut t = nt.as_ref();
+      TreeEnum::Node(ref mut t) => {
         if k == t.key {
           t.value = v
         } else {
