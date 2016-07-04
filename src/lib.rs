@@ -39,7 +39,52 @@ impl TreeNode {
 }
 
 #[test]
-fn it_works() {
-  let t = TreeNode::new();
-  println!("{:?}", t)
+fn new_empty() {
+  let mut t = TreeNode::new();
+  assert_eq!(t.get(0), None);
+}
+
+#[test]
+fn set_get_missing() {
+  let mut t = TreeNode::new();
+  t.set(1,2);
+  let v = t.get(3);
+  assert_eq!(v, None);
+}
+
+#[test]
+fn set_get_1() {
+  let mut t = TreeNode::new();
+  t.set(1,41);
+  let v = t.get(1);
+  println!("{:?}", v);
+  assert_eq!(v.unwrap(), 41);
+}
+
+#[test]
+fn set_get_1_1() {
+  let mut t = TreeNode::new();
+  t.set(1,42);
+  t.set(1,41);
+  assert_eq!(t.get(1).unwrap(), 41);
+}
+
+#[test]
+fn set_get_1_2() {
+  let mut t = TreeNode::new();
+  t.set(1,41);
+  t.set(2,42);
+  assert_eq!(t.get(1).unwrap(), 41);
+  assert_eq!(t.get(2).unwrap(), 42);
+}
+
+#[test]
+fn set_get_1_3_2() {
+  let mut t = TreeNode::new();
+  t.set(1,41);
+  t.set(3,43);
+  t.set(2,42);
+  assert_eq!(t.get(1).unwrap(), 41);
+  assert_eq!(t.get(2).unwrap(), 42);
+  assert_eq!(t.get(3).unwrap(), 43);
 }
