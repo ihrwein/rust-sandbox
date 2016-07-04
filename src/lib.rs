@@ -1,5 +1,10 @@
 #[derive(Debug)]
-enum Tree {
+struct Tree {
+  t: TreeEnum
+}
+
+#[derive(Debug)]
+enum TreeEnum {
   Empty,
   Node(Box<TreeNode>)
 }
@@ -14,19 +19,19 @@ struct TreeNode {
 
 impl Tree {
   fn new() -> Tree {
-    Tree::Empty
+    Tree{ t: TreeEnum::Empty }
   }
 
   fn get(self: &Tree, k: u32) -> Option<u32> {
-    match self {
-      &Tree::Empty => None,
-      &Tree::Node(ref nt) => {
+    match self.t {
+      TreeEnum::Empty => None,
+      TreeEnum::Node(ref nt) => {
         let t = nt.as_ref();
-        if (k == t.key) {
+        if k == t.key {
           Some(t.value)
         } else {
           let n = {
-            if (k < t.key) {
+            if k < t.key {
               &t.left
             } else {
               &t.right
@@ -38,18 +43,17 @@ impl Tree {
     }
   }
 
-//  fn set_helper(t: &TreeNode) -> Option<Box<TreeNode>> {
-//  }
-
   fn set(self: &mut Tree, k: u32, v: u32) {
-    match self {
-      &mut Tree::Empty => {
-        let mut n = TreeNode {key: k, value: v, left: Tree::Empty, right: Tree::Empty};
-        self = Tree::Node(Box::new(n));
+    match self.t {
+      TreeEnum::Empty => {
+        let mut n = TreeNode {key: k, value: v,
+           left: Tree{t:TreeEnum::Empty},
+           right: Tree{t:TreeEnum::Empty} };
+        self.t = TreeEnum::Node(Box::new(n));
       },
-      &mut Tree::Node(ref nt) => {
-        let t = nt.as_ref();
-        if (k == t.key) {
+      TreeEnum::Node(ref mut nt) => {
+        let mut t = nt.as_ref();
+        if k == t.key {
           t.value = v
         } else {
           t.left.set(k, v)
