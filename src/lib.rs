@@ -1,6 +1,6 @@
 #[derive(Debug)]
 struct TreeNode {
-  key: u32,
+  key: Option<u32>,
   value: u32,
   left: Option<Box<TreeNode>>,
   right: Option<Box<TreeNode>>
@@ -9,7 +9,7 @@ struct TreeNode {
 impl TreeNode {
   fn new() -> TreeNode {
     TreeNode {
-      key: 0,
+      key: None,
       value: 0,
       left: None,
       right: None
@@ -17,20 +17,24 @@ impl TreeNode {
   }
 
   fn get(self: &TreeNode, k: u32) -> Option<u32> {
-    if (k == self.key) {
-      Some(self.value)
-    } else {
-      let n = {
-        if (k < self.key) {
-          &self.left
+    match self.key {
+      None => None,
+      Some(sk) =>
+        if (k == sk) {
+          Some(self.value)
         } else {
-          &self.right
+          let n = {
+            if (k < sk) {
+              &self.left
+            } else {
+              &self.right
+            }
+          };
+          match n {
+            &None => None,
+            &Some(ref sn) => sn.as_ref().get(k)
+          }
         }
-      };
-      match n {
-        &None => None,
-        &Some(ref sn) => sn.as_ref().get(k)
-      }
     }
   }
 
