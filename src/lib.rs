@@ -38,7 +38,29 @@ impl TreeNode {
     }
   }
 
+//  fn set_helper(t: &TreeNode) -> Option<Box<TreeNode>> {
+//  }
+
   fn set(self: &mut TreeNode, k: u32, v: u32) {
+    match self.key {
+      None => {
+        self.key = Some(k);
+        self.value = v
+      }
+      Some(sk) => {
+        if (k == sk) {
+          self.value = v
+        } else {
+          match self.left {
+            None => {
+              let new = TreeNode {key: Some(k), value: v, left: None, right: None};
+              self.left = Some(Box::new(new));
+            },
+            Some(&mut ref sn) => sn.as_ref().set(k, v)
+          };
+        }
+      }
+    }
   }
 }
 
