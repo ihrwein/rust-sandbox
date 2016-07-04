@@ -1,10 +1,10 @@
 #[derive(Debug)]
 struct Tree {
-  t: TreeEnum
+  t: TreeKind
 }
 
 #[derive(Debug)]
-enum TreeEnum {
+enum TreeKind {
   Empty,
   Node(Box<TreeNode>)
 }
@@ -19,52 +19,52 @@ struct TreeNode {
 
 impl Tree {
   fn new() -> Tree {
-    Tree{ t: TreeEnum::Empty }
+    Tree { t: TreeKind::Empty }
   }
 
   fn get(self: &Tree, k: u32) -> Option<u32> {
     match self.t {
-      TreeEnum::Empty => None,
-      TreeEnum::Node(ref nt) => {
-        let t = nt.as_ref();
-        if k == t.key {
-          Some(t.value)
+      TreeKind::Empty =>
+        None,
+
+      TreeKind::Node(ref n) =>
+        if k == n.key {
+          Some(n.value)
+        } else if k < n.key {
+          n.left.get(k)
         } else {
-          let n = {
-            if k < t.key {
-              &t.left
-            } else {
-              &t.right
-            }
-          };
-          n.get(k)
+          n.right.get(k)
         }
-      }
     }
   }
 
   fn set(self: &mut Tree, k: u32, v: u32) {
     match self.t {
-      TreeEnum::Empty => {
-        let mut n = TreeNode {key: k, value: v,
-           left: Tree{t:TreeEnum::Empty},
-           right: Tree{t:TreeEnum::Empty} };
-        self.t = TreeEnum::Node(Box::new(n));
+      TreeKind::Empty => {
+        let n = TreeNode {
+          key: k,
+          value: v,
+          left: Tree::new(),
+          right: Tree::new()
+        };
+        self.t = TreeKind::Node(Box::new(n));
       },
-      TreeEnum::Node(ref mut t) => {
-        if k == t.key {
-          t.value = v
+
+      TreeKind::Node(ref mut n) =>
+        if k == n.key {
+          n.value = v
+        } else if k < n.key {
+          n.left.set(k, v)
         } else {
-          t.left.set(k, v)
+          n.right.set(k, v)
         }
-      }
     }
   }
 }
 
 #[test]
 fn new_empty() {
-  let mut t = Tree::new();
+  let t = Tree::new();
   assert_eq!(t.get(0), None);
 }
 
@@ -80,9 +80,7 @@ fn set_get_missing() {
 fn set_get_1() {
   let mut t = Tree::new();
   t.set(1,41);
-  let v = t.get(1);
-  println!("{:?}", v);
-  assert_eq!(v.unwrap(), 41);
+  assert_eq!(t.get(1).unwrap(), 41);
 }
 
 #[test]
@@ -108,6 +106,7 @@ fn set_get_1_3_2() {
   t.set(1,41);
   t.set(3,43);
   t.set(2,42);
+  println!("{:?}", t);
   assert_eq!(t.get(1).unwrap(), 41);
   assert_eq!(t.get(2).unwrap(), 42);
   assert_eq!(t.get(3).unwrap(), 43);
