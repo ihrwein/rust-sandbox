@@ -1,5 +1,5 @@
 #[derive(Debug)]
-struct Tree {
+pub struct Tree {
   t: TreeKind
 }
 
@@ -18,18 +18,18 @@ struct TreeNode {
 }
 
 impl Tree {
-  fn new() -> Tree {
+  pub fn new() -> Tree {
     Tree { t: TreeKind::Empty }
   }
 
-  fn get(self: &Tree, k: u32) -> Option<u32> {
+  pub fn get(&self, k: u32) -> Option<&u32> {
     match self.t {
       TreeKind::Empty =>
         None,
 
       TreeKind::Node(ref n) =>
         if k == n.key {
-          Some(n.value)
+          Some(&n.value)
         } else if k < n.key {
           n.left.get(k)
         } else {
@@ -38,7 +38,7 @@ impl Tree {
     }
   }
 
-  fn set(self: &mut Tree, k: u32, v: u32) {
+  pub fn set(&mut self, k: u32, v: u32) {
     match self.t {
       TreeKind::Empty => {
         let n = TreeNode {
@@ -62,6 +62,7 @@ impl Tree {
   }
 }
 
+
 #[test]
 fn new_empty() {
   let t = Tree::new();
@@ -80,7 +81,7 @@ fn set_get_missing() {
 fn set_get_1() {
   let mut t = Tree::new();
   t.set(1,41);
-  assert_eq!(t.get(1).unwrap(), 41);
+  assert_eq!(t.get(1).unwrap(), &41);
 }
 
 #[test]
@@ -88,7 +89,7 @@ fn set_get_1_1() {
   let mut t = Tree::new();
   t.set(1,42);
   t.set(1,41);
-  assert_eq!(t.get(1).unwrap(), 41);
+  assert_eq!(t.get(1).unwrap(), &41);
 }
 
 #[test]
@@ -96,8 +97,8 @@ fn set_get_1_2() {
   let mut t = Tree::new();
   t.set(1,41);
   t.set(2,42);
-  assert_eq!(t.get(1).unwrap(), 41);
-  assert_eq!(t.get(2).unwrap(), 42);
+  assert_eq!(t.get(1).unwrap(), &41);
+  assert_eq!(t.get(2).unwrap(), &42);
 }
 
 #[test]
@@ -107,7 +108,7 @@ fn set_get_1_3_2() {
   t.set(3,43);
   t.set(2,42);
   println!("{:?}", t);
-  assert_eq!(t.get(1).unwrap(), 41);
-  assert_eq!(t.get(2).unwrap(), 42);
-  assert_eq!(t.get(3).unwrap(), 43);
+  assert_eq!(t.get(1).unwrap(), &41);
+  assert_eq!(t.get(2).unwrap(), &42);
+  assert_eq!(t.get(3).unwrap(), &43);
 }
