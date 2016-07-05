@@ -11,6 +11,24 @@ struct TreeNode<K: Ord, V> {
   right: Tree<K, V>
 }
 
+
+impl<K: Clone + Ord, V: Clone> Clone for Tree<K, V> {
+  fn clone(&self) -> Tree<K, V> {
+    Tree(self.0.clone())
+  }
+}
+
+impl<K: Clone + Ord, V: Clone> Clone for TreeNode<K, V> {
+  fn clone(&self) -> TreeNode<K, V> {
+    TreeNode {
+      key: self.key.clone(),
+      value: self.value.clone(),
+      left: self.left.clone(),
+      right: self.right.clone()
+    }
+  }
+}
+
 impl<K: Ord, V> Tree<K, V> {
   pub fn new() -> Tree<K, V> {
     Tree(None)
