@@ -17,19 +17,15 @@ impl Tree {
   }
 
   pub fn get(&self, k: u32) -> Option<&u32> {
-    match self.0 {
-      None =>
-        None,
-
-      Some(ref n) =>
-        if k == n.key {
-          Some(&n.value)
-        } else if k < n.key {
-          n.left.get(k)
-        } else {
-          n.right.get(k)
-        }
-    }
+    self.0.as_ref().map_or(None, |n| {
+      if k == n.key {
+        Some(&n.value)
+      } else if k < n.key {
+        n.left.get(k)
+      } else {
+        n.right.get(k)
+      }
+    })
   }
 
   pub fn set(&mut self, k: u32, v: u32) {
