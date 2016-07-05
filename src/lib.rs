@@ -1,7 +1,5 @@
 #[derive(Debug)]
-pub struct Tree {
-  t: TreeKind
-}
+pub struct Tree(TreeKind);
 
 #[derive(Debug)]
 enum TreeKind {
@@ -19,11 +17,11 @@ struct TreeNode {
 
 impl Tree {
   pub fn new() -> Tree {
-    Tree { t: TreeKind::Empty }
+    Tree(TreeKind::Empty)
   }
 
   pub fn get(&self, k: u32) -> Option<&u32> {
-    match self.t {
+    match self.0 {
       TreeKind::Empty =>
         None,
 
@@ -39,7 +37,7 @@ impl Tree {
   }
 
   pub fn set(&mut self, k: u32, v: u32) {
-    match self.t {
+    match self.0 {
       TreeKind::Empty => {
         let n = TreeNode {
           key: k,
@@ -47,7 +45,7 @@ impl Tree {
           left: Tree::new(),
           right: Tree::new()
         };
-        self.t = TreeKind::Node(Box::new(n));
+        self.0 = TreeKind::Node(Box::new(n));
       },
 
       TreeKind::Node(ref mut n) =>
