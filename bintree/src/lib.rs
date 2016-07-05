@@ -1,11 +1,7 @@
 #[derive(Debug)]
 pub struct Tree(TreeKind);
 
-#[derive(Debug)]
-enum TreeKind {
-  Empty,
-  Node(Box<TreeNode>)
-}
+type TreeKind = Option<Box<TreeNode>>;
 
 #[derive(Debug)]
 struct TreeNode {
@@ -17,15 +13,15 @@ struct TreeNode {
 
 impl Tree {
   pub fn new() -> Tree {
-    Tree(TreeKind::Empty)
+    Tree(None)
   }
 
   pub fn get(&self, k: u32) -> Option<&u32> {
     match self.0 {
-      TreeKind::Empty =>
+      None =>
         None,
 
-      TreeKind::Node(ref n) =>
+      Some(ref n) =>
         if k == n.key {
           Some(&n.value)
         } else if k < n.key {
@@ -38,17 +34,17 @@ impl Tree {
 
   pub fn set(&mut self, k: u32, v: u32) {
     match self.0 {
-      TreeKind::Empty => {
+      None => {
         let n = TreeNode {
           key: k,
           value: v,
           left: Tree::new(),
           right: Tree::new()
         };
-        self.0 = TreeKind::Node(Box::new(n));
+        self.0 = Some(Box::new(n));
       },
 
-      TreeKind::Node(ref mut n) =>
+      Some(ref mut n) =>
         if k == n.key {
           n.value = v
         } else if k < n.key {
