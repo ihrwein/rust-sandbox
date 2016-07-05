@@ -1,22 +1,22 @@
 #[derive(Debug)]
-pub struct Tree(TreeKind);
+pub struct Tree<K: Ord, V> (TreeKind<K, V>);
 
-type TreeKind = Option<Box<TreeNode>>;
+type TreeKind<K, V> = Option<Box<TreeNode<K, V>>>;
 
 #[derive(Debug)]
-struct TreeNode {
-  key: u32,
-  value: u32,
-  left: Tree,
-  right: Tree
+struct TreeNode<K: Ord, V> {
+  key: K,
+  value: V,
+  left: Tree<K, V>,
+  right: Tree<K, V>
 }
 
-impl Tree {
-  pub fn new() -> Tree {
+impl<K: Ord, V> Tree<K, V> {
+  pub fn new() -> Tree<K, V> {
     Tree(None)
   }
 
-  pub fn get(&self, k: u32) -> Option<&u32> {
+  pub fn get(&self, k: K) -> Option<&V> {
     self.0.as_ref().map_or(None, |n| {
       if k == n.key {
         Some(&n.value)
@@ -28,7 +28,7 @@ impl Tree {
     })
   }
 
-  pub fn set(&mut self, k: u32, v: u32) {
+  pub fn set(&mut self, k: K, v: V) {
     match self.0 {
       None => {
         let n = TreeNode {
@@ -55,7 +55,7 @@ impl Tree {
 
 #[test]
 fn new_empty() {
-  let t = Tree::new();
+  let t: Tree<_, i32> = Tree::new();
   assert_eq!(t.get(0), None);
 }
 
