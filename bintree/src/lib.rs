@@ -88,36 +88,34 @@ impl<K: Ord, V> Tree<K, V> {
             right.inorder_eat(callback);
         }
     }
+
+    pub fn inorder_iter<'a>(&'a self) -> InorderIter<'a, K, V> {
+        InorderIter {stack: Vec::new(), node: self.0.as_ref()}
+    }
 }
 
-// impl<K: Ord, V> Tree<K, V> {
-//     pub fn inorder_iter<'a>(&'a self) -> InorderIter<'a, K, V> {
-//         InorderIter {stack: Vec::new(), node: self}
-//     }
-// }
+pub struct InorderIter<'a, K: Ord + 'a, V: 'a> {
+    stack: Vec<&'a Box<TreeNode<K, V>>>,
+    node: Option<&'a Box<TreeNode<K, V>>>
+}
 
-// pub struct InorderIter<'a, K: Ord + 'a, V: 'a> {
-//     stack: Vec<&'a Box<TreeNode<K, V>>>,
-//     node: Option<&'a Box<TreeNode<K, V>>>
-// }
-//
-// impl<'a, K: Ord, V> Iterator for InorderIter<'a, K, V> {
-//     type Item = (&'a K, &'a V);
-//
-//     fn next(&mut self) -> Option<Self::Item> {
-//         while !self.stack.is_empty() || self.node.is_some() {
-//             if let Some(ref n) = self.node {
-//                 self.stack.push(n);
-//                 self.node = n.left.0.as_ref();
-//             } else {
-//                 self.node = self.stack.pop();
-//                 return self.node.map(|node| (&node.key, &node.value));
-//                 self.node = self.node.map(|x| x.right);
-//             }
-//         }
-//         None
-//     }
-// }
+impl<'a, K: Ord, V> Iterator for InorderIter<'a, K, V> {
+    type Item = (&'a K, &'a V);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if let Some(n) = self.node {
+                self.stack.push(n);
+                self.node = n.left.0.as_ref();
+            } else if let Some(n) = self.stack.pop() {
+                self.node = n.right.0.as_ref();
+                return Some((&n.key, &n.value));
+            } else {
+                return None;
+            }
+        }
+    }
+}
 
 fn iterative_inorder<K: Ord, V, F: FnMut((&K, &V))>(mut node: Option<&Box<TreeNode<K, V>>>, mut cb: F) {
     let mut stack = Vec::new();
@@ -250,6 +248,19 @@ fn test_iterative_inorder() {
     iterative_inorder(t.0.as_ref(), |(k, _)| {
         traversed_keys.push(*k);
     });
+
+    assert_eq!(&expected_order[..], &traversed_keys[..]);
+}
+
+#[test]
+fn test_inorder_iterator() {
+    let mut t = Tree::new();
+    t.set(1, 41);
+    t.set(3, 43);
+    t.set(2, 42);
+
+    let expected_order = [1, 2, 3];
+    let traversed_keys = t.inorder_iter().map(|(k, _)| *k).collect::<Vec<i32>>();
 
     assert_eq!(&expected_order[..], &traversed_keys[..]);
 }
