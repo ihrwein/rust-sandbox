@@ -69,6 +69,14 @@ impl<K: Ord, V> Tree<K, V> {
             }
         }
     }
+
+    pub fn inorder<F: FnMut(&K, &V)>(&self, callback: &mut F) {
+        if let Some(ref n) = self.0 {
+            n.left.inorder(callback);
+            callback(&n.key, &n.value);
+            n.right.inorder(callback);
+        }
+    }
 }
 
 
@@ -120,4 +128,21 @@ fn set_get_1_3_2() {
     assert_eq!(t.get(1).unwrap(), &41);
     assert_eq!(t.get(2).unwrap(), &42);
     assert_eq!(t.get(3).unwrap(), &43);
+}
+
+#[test]
+fn test_recursive_inorder_traversal() {
+    let mut t = Tree::new();
+    t.set(1, 41);
+    t.set(3, 43);
+    t.set(2, 42);
+
+    let expected_order = [1, 2, 3];
+    let mut traversed_keys = Vec::new();
+
+    t.inorder(&mut |k, _| {
+        traversed_keys.push(*k);
+    });
+
+    assert_eq!(&expected_order[..], &traversed_keys[..]);
 }
