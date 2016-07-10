@@ -90,6 +90,64 @@ impl<K: Ord, V> Tree<K, V> {
     }
 }
 
+// impl<K: Ord, V> Tree<K, V> {
+//     pub fn inorder_iter<'a>(&'a self) -> InorderIter<'a, K, V> {
+//         InorderIter {stack: Vec::new(), node: self}
+//     }
+// }
+
+// pub struct InorderIter<'a, K: Ord + 'a, V: 'a> {
+//     stack: Vec<&'a Box<TreeNode<K, V>>>,
+//     node: Option<&'a Box<TreeNode<K, V>>>
+// }
+//
+// impl<'a, K: Ord, V> Iterator for InorderIter<'a, K, V> {
+//     type Item = (&'a K, &'a V);
+//
+//     fn next(&mut self) -> Option<Self::Item> {
+//         while !self.stack.is_empty() || self.node.is_some() {
+//             if let Some(ref n) = self.node {
+//                 self.stack.push(n);
+//                 self.node = n.left.0.as_ref();
+//             } else {
+//                 self.node = self.stack.pop();
+//                 return self.node.map(|node| (&node.key, &node.value));
+//                 self.node = self.node.map(|x| x.right);
+//             }
+//         }
+//         None
+//     }
+// }
+
+fn iterative_inorder<K: Ord, V, F: FnMut((&K, &V))>(mut node: Option<&Box<TreeNode<K, V>>>, mut cb: F) {
+    let mut stack = Vec::new();
+
+    loop {
+        if let Some(n) = node {
+            stack.push(n);
+            node = n.left.0.as_ref();
+        } else if let Some(n) = stack.pop() {
+            cb((&n.key, &n.value));
+            node = n.right.0.as_ref();
+        } else {
+            return;
+        }
+    }
+}
+
+/*
+iterativeInorder(node)
+  s ← empty stack
+  while (not s.isEmpty() or node ≠ null)
+    if (node ≠ null)
+      s.push(node)
+      node ← node.left
+    else
+      node ← s.pop()
+      visit(node)
+      node ← node.right
+*/
+
 
 #[test]
 fn new_empty() {
@@ -177,4 +235,21 @@ fn test_eating_recursive_inorder_traversal() {
     // });
 
     assert_eq!(&expected_values[..], &traversed_values[..]);
+}
+
+#[test]
+fn test_iterative_inorder() {
+    let mut t = Tree::new();
+    t.set(1, 41);
+    t.set(3, 43);
+    t.set(2, 42);
+
+    let expected_order = [1, 2, 3];
+    let mut traversed_keys = Vec::<i32>::new();
+
+    iterative_inorder(t.0.as_ref(), |(k, _)| {
+        traversed_keys.push(*k);
+    });
+
+    assert_eq!(&expected_order[..], &traversed_keys[..]);
 }
