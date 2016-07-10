@@ -77,6 +77,17 @@ impl<K: Ord, V> Tree<K, V> {
             n.right.inorder(callback);
         }
     }
+
+    pub fn inorder_eat<F: FnMut(K, V)>(self, callback: &mut F) {
+        if let Some(n) = self.0 {
+            // workaround for https://github.com/rust-lang/rust/issues/16223
+            let _n = *n;
+            let TreeNode{key, value, left, right} = _n;
+            left.inorder_eat(callback);
+            callback(key, value);
+            right.inorder_eat(callback);
+        }
+    }
 }
 
 
@@ -145,4 +156,25 @@ fn test_recursive_inorder_traversal() {
     });
 
     assert_eq!(&expected_order[..], &traversed_keys[..]);
+}
+
+#[test]
+fn test_eating_recursive_inorder_traversal() {
+    let mut t = Tree::new();
+    t.set(1, "41".to_string());
+    t.set(3, "43".to_string());
+    t.set(2, "42".to_string());
+
+    let expected_values = ["41".to_string(), "42".to_string(), "43".to_string()];
+    let mut traversed_values = Vec::new();
+
+    t.inorder_eat(&mut |_, v| {
+        traversed_values.push(v);
+    });
+
+    // t.inorder_eat(&mut |_, _| {
+    //     println!("This shouldn't compile as we eat the tree with the previous traversal");
+    // });
+
+    assert_eq!(&expected_values[..], &traversed_values[..]);
 }
