@@ -147,7 +147,7 @@ impl<K: Ord, V> Iterator for EatingInorderIter<K, V> {
     }
 }
 
-fn iterative_inorder<K: Ord, V, F: FnMut((&K, &V))>(mut node: Option<&Box<TreeNode<K, V>>>, mut cb: F) {
+pub fn iterative_inorder<K: Ord, V, F: FnMut((&K, &V))>(mut node: Option<&Box<TreeNode<K, V>>>, mut cb: F) {
     let mut stack = Vec::new();
 
     loop {
