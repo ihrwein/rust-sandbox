@@ -92,6 +92,10 @@ impl<K: Ord, V> Tree<K, V> {
     pub fn inorder_iter<'a>(&'a self) -> InorderIter<'a, K, V> {
         InorderIter {stack: Vec::new(), node: self.0.as_ref()}
     }
+
+    pub fn inorder_eating_iter(self) -> EatingInorderIter<K, V> {
+        EatingInorderIter { stack: Vec::new(), node: self.0}
+    }
 }
 
 pub struct InorderIter<'a, K: Ord + 'a, V: 'a> {
@@ -110,6 +114,32 @@ impl<'a, K: Ord, V> Iterator for InorderIter<'a, K, V> {
             } else if let Some(n) = self.stack.pop() {
                 self.node = n.right.0.as_ref();
                 return Some((&n.key, &n.value));
+            } else {
+                return None;
+            }
+        }
+    }
+}
+
+pub struct EatingInorderIter<K: Ord, V> {
+    stack: Vec<Box<TreeNode<K, V>>>,
+    node: Option<Box<TreeNode<K, V>>>
+}
+
+impl<K: Ord, V> Iterator for EatingInorderIter<K, V> {
+    type Item = (K, V);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if let Some(mut n) = self.node.take() {
+                self.node = n.left.0.take();
+                self.stack.push(n);
+            } else if let Some(mut n) = self.stack.pop() {
+                self.node = n.right.0.take();
+                let _n = *n;
+                let TreeNode{key, value, left, right} = _n;
+                let (_,_) = (left, right);
+                return Some((key, value));
             } else {
                 return None;
             }
@@ -263,4 +293,21 @@ fn test_inorder_iterator() {
     let traversed_keys = t.inorder_iter().map(|(k, _)| *k).collect::<Vec<i32>>();
 
     assert_eq!(&expected_order[..], &traversed_keys[..]);
+}
+
+#[test]
+fn test_eating_inorder_traversal() {
+    let mut t = Tree::new();
+    t.set(1, "41".to_string());
+    t.set(3, "43".to_string());
+    t.set(2, "42".to_string());
+
+    let expected_values = ["41".to_string(), "42".to_string(), "43".to_string()];
+    let traversed_values = t.inorder_eating_iter().map(|(_, v)| v).collect::<Vec<String>>();
+
+    // t.inorder_eat(&mut |_, _| {
+    //     println!("This shouldn't compile as we eat the tree with the previous traversal");
+    // });
+
+    assert_eq!(&expected_values[..], &traversed_values[..]);
 }
