@@ -4,7 +4,7 @@ pub struct Tree<K: Ord, V>(TreeKind<K, V>);
 type TreeKind<K, V> = Option<Box<TreeNode<K, V>>>;
 
 #[derive(Debug)]
-struct TreeNode<K: Ord, V> {
+pub struct TreeNode<K: Ord, V> {
     key: K,
     value: V,
     left: Tree<K, V>,
@@ -176,6 +176,32 @@ iterativeInorder(node)
       node ← node.right
 */
 
+pub fn gen_bin_tree(depth: u32) -> Tree<i32, i32> {
+    let node = bin_tree_factory::<i32, i32>(2_i32.pow(depth), depth);
+    Tree(Some(Box::new(node)))
+}
+
+fn bin_tree_factory<K: Ord, V>(root: i32, depth: u32) -> TreeNode<i32, i32> {
+    if depth == 0 {
+        TreeNode {
+            key: root,
+            value: root,
+            left: Tree(None),
+            right: Tree(None)
+        }
+    } else {
+        let left_child = bin_tree_factory::<i32, i32>(root - 2_i32.pow(depth - 1), depth - 1);
+        let right_child = bin_tree_factory::<i32, i32>(root + 2_i32.pow(depth - 1), depth - 1);
+        TreeNode {
+            key: root,
+            value: root,
+            left: Tree(Some(Box::new(left_child))),
+            right: Tree(Some(Box::new(right_child))),
+        }
+    }
+}
+
+
 
 #[test]
 fn new_empty() {
@@ -310,4 +336,12 @@ fn test_eating_inorder_traversal() {
     // });
 
     assert_eq!(&expected_values[..], &traversed_values[..]);
+}
+
+#[test]
+fn test_bin_tree_factory() {
+    let tree = gen_bin_tree(9);
+    let kv_pairs = tree.inorder_eating_iter().collect::<Vec<(i32, i32)>>();
+    let expected = (1..1024).map(|v| (v, v)).collect::<Vec<(i32, i32)>>();
+    assert_eq!(expected, kv_pairs);
 }
