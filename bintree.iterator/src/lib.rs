@@ -74,15 +74,13 @@ impl Tree {
   pub fn iter(&self) -> TreeIterator {
     TreeIterator {
       node: &self,
-      done: false,
-      parents: Vec::new()
+      stack: Vec::new()
     }
   }
 }
 
 pub struct TreeIterator<'a> {
-  parents: Vec<&'a TreeNode>,
-  done: bool,
+  stack: Vec<&'a Box<TreeNode>>,
   node: &'a Tree
 }
 
@@ -90,29 +88,22 @@ impl<'a> Iterator for TreeIterator<'a> {
   type Item = (i32, i32);
 
   fn next(&mut self) -> Option<Self::Item> {
-    match self.node.0 {
-      None => None,
-
-      Some(ref n) =>
-        match n.left.0 {
-          Some(ref t) => {
-            self.node = &n.left;
-            Some((t.key, t.value))
-          }
-
-          None => {
-            match self.done {
-              false => {
-                self.done = true;
-                Some((n.key, n.value))
-              }
-
-              true => {
-                None
-              }
-            }
-          }
+    let mut ln = self.node;
+    loop {
+      match ln.0 {
+        None => break,
+        Some(ref l) => {
+          ln = &l.left;
+          self.stack.push(&l);
         }
+      }
+    }
+  println!("{:?}", self.stack);
+    let node = self.stack.pop();
+    match node {
+      Some(ref tn) =>
+          Some((tn.key,tn.value)),
+      None => None
     }
   }
 }
