@@ -68,8 +68,32 @@ impl Tree {
         }
     }
   }
+
+  pub fn iter(&self) -> TreeIterator {
+    TreeIterator {
+      node: None
+    }
+  }
 }
 
+pub struct TreeIterator {
+  node: Option<TreeNode>
+}
+
+impl Iterator for TreeIterator {
+  type Item = i32;
+
+  fn next(&mut self) -> Option<Self::Item> {
+    None
+  }
+}
+
+#[test]
+fn iterator_empty() {
+  let t = Tree::new();
+  let mut iter = t.iter();
+  assert_eq!(iter.next(), None);
+}
 
 #[test]
 fn new_empty() {
