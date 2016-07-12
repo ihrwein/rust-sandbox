@@ -1,25 +1,25 @@
 #[derive(Debug)]
-pub struct Tree<K: Ord, V> (TreeKind<K, V>);
+pub struct Tree (TreeKind);
 
-type TreeKind<K, V> = Option<Box<TreeNode<K, V>>>;
+type TreeKind = Option<Box<TreeNode>>;
 
 #[derive(Debug)]
-struct TreeNode<K: Ord, V> {
-  key: K,
-  value: V,
-  left: Tree<K, V>,
-  right: Tree<K, V>
+struct TreeNode {
+  key: i32,
+  value: i32,
+  left: Tree,
+  right: Tree
 }
 
 
-impl<K: Clone + Ord, V: Clone> Clone for Tree<K, V> {
-  fn clone(&self) -> Tree<K, V> {
+impl Clone for Tree {
+  fn clone(&self) -> Tree {
     Tree(self.0.clone())
   }
 }
 
-impl<K: Clone + Ord, V: Clone> Clone for TreeNode<K, V> {
-  fn clone(&self) -> TreeNode<K, V> {
+impl Clone for TreeNode {
+  fn clone(&self) -> TreeNode {
     TreeNode {
       key: self.key.clone(),
       value: self.value.clone(),
@@ -29,12 +29,12 @@ impl<K: Clone + Ord, V: Clone> Clone for TreeNode<K, V> {
   }
 }
 
-impl<K: Ord, V> Tree<K, V> {
-  pub fn new() -> Tree<K, V> {
+impl Tree {
+  pub fn new() -> Tree {
     Tree(None)
   }
 
-  pub fn get(&self, k: K) -> Option<&V> {
+  pub fn get(&self, k: i32) -> Option<&i32> {
     self.0.as_ref().map_or(None, |n| {
       if k == n.key {
         Some(&n.value)
@@ -46,7 +46,7 @@ impl<K: Ord, V> Tree<K, V> {
     })
   }
 
-  pub fn set(&mut self, k: K, v: V) {
+  pub fn set(&mut self, k: i32, v: i32) {
     match self.0 {
       None => {
         let n = TreeNode {
@@ -73,7 +73,7 @@ impl<K: Ord, V> Tree<K, V> {
 
 #[test]
 fn new_empty() {
-  let t: Tree<_, i32> = Tree::new();
+  let t: Tree = Tree::new();
   assert_eq!(t.get(0), None);
 }
 
