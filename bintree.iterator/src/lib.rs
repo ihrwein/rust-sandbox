@@ -1,3 +1,5 @@
+use std::collections;
+
 #[derive(Debug)]
 pub struct Tree (TreeKind);
 
@@ -71,20 +73,47 @@ impl Tree {
 
   pub fn iter(&self) -> TreeIterator {
     TreeIterator {
-      node: None
+      node: &self,
+      done: false,
+      parents: Vec::new()
     }
   }
 }
 
-pub struct TreeIterator {
-  node: Option<TreeNode>
+pub struct TreeIterator<'a> {
+  parents: Vec<&'a TreeNode>,
+  done: bool,
+  node: &'a Tree
 }
 
-impl Iterator for TreeIterator {
-  type Item = i32;
+impl<'a> Iterator for TreeIterator<'a> {
+  type Item = (i32, i32);
 
   fn next(&mut self) -> Option<Self::Item> {
-    None
+    match self.node.0 {
+      None => None,
+
+      Some(ref n) =>
+        match n.left.0 {
+          Some(ref t) => {
+            self.node = &n.left;
+            Some((t.key, t.value))
+          }
+
+          None => {
+            match self.done {
+              false => {
+                self.done = true;
+                Some((n.key, n.value))
+              }
+
+              true => {
+                None
+              }
+            }
+          }
+        }
+    }
   }
 }
 
@@ -92,6 +121,80 @@ impl Iterator for TreeIterator {
 fn iterator_empty() {
   let t = Tree::new();
   let mut iter = t.iter();
+  assert_eq!(iter.next(), None);
+}
+
+#[test]
+fn iterator_single() {
+  let mut t = Tree::new();
+  t.set(1,2);
+  let mut iter = t.iter();
+  assert_eq!(iter.next(), Some((1,2)));
+  assert_eq!(iter.next(), None);
+}
+
+#[test]
+fn iterator_left() {
+  let mut t = Tree::new();
+  t.set(2,3);
+  t.set(1,2);
+  let mut iter = t.iter();
+  assert_eq!(iter.next(), Some((1,2)));
+  assert_eq!(iter.next(), Some((2,3)));
+  assert_eq!(iter.next(), None);
+}
+
+#[test]
+fn iterator_right() {
+  let mut t = Tree::new();
+  t.set(1,2);
+  t.set(2,3);
+  let mut iter = t.iter();
+  assert_eq!(iter.next(), Some((1,2)));
+  assert_eq!(iter.next(), Some((2,3)));
+  assert_eq!(iter.next(), None);
+}
+
+#[test]
+fn iterator_left_right() {
+  let mut t = Tree::new();
+  t.set(1,2);
+  t.set(2,3);
+  t.set(3,4);
+  let mut iter = t.iter();
+  assert_eq!(iter.next(), Some((1,2)));
+  assert_eq!(iter.next(), Some((2,3)));
+  assert_eq!(iter.next(), Some((3,4)));
+  assert_eq!(iter.next(), None);
+}
+
+#[test]
+fn iterator_left_left() {
+  let mut t = Tree::new();
+  t.set(3,4);
+  t.set(2,3);
+  t.set(1,2);
+  let mut iter = t.iter();
+  assert_eq!(iter.next(), Some((1,2)));
+  assert_eq!(iter.next(), Some((2,3)));
+  assert_eq!(iter.next(), Some((3,4)));
+  assert_eq!(iter.next(), None);
+}
+
+#[test]
+fn iterator_left_left_right_right() {
+  let mut t = Tree::new();
+  t.set(3,4);
+  t.set(2,3);
+  t.set(1,2);
+  t.set(4,5);
+  t.set(5,6);
+  let mut iter = t.iter();
+  assert_eq!(iter.next(), Some((1,2)));
+  assert_eq!(iter.next(), Some((2,3)));
+  assert_eq!(iter.next(), Some((3,4)));
+  assert_eq!(iter.next(), Some((4,5)));
+  assert_eq!(iter.next(), Some((5,6)));
   assert_eq!(iter.next(), None);
 }
 
