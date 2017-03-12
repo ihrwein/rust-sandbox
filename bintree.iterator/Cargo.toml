@@ -1,0 +1,6 @@
+[package]
+name = "bintree"
+version = "0.1.0"
+authors = ["bkil-syslogng <tamas.nagy@balabit.com>"]
+
+[dependencies]
