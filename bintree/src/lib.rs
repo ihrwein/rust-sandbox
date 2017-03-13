@@ -1,18 +1,18 @@
 #[derive(Debug)]
-pub struct Tree {
+pub struct Node {
     key: i32,
     value: i32,
-    left: Branch,
-    right: Branch,
+    left: Tree,
+    right: Tree,
 }
 
-impl Tree {
-    pub fn new(k: i32, v: i32) -> Tree {
-        Tree {
+impl Node {
+    pub fn new(k: i32, v: i32) -> Node {
+        Node {
             key: k,
             value: v,
-            left: Branch::new(),
-            right: Branch::new(),
+            left: Tree::new(),
+            right: Tree::new(),
         }
     }
 
@@ -38,11 +38,11 @@ impl Tree {
 }
 
 #[derive(Debug)]
-struct Branch(Option<Box<Tree>>);
+struct Tree(Option<Box<Node>>);
 
-impl Branch {
-    fn new() -> Branch {
-        Branch(None)
+impl Tree {
+    fn new() -> Tree {
+        Tree(None)
     }
 
     fn get(&self, k: i32) -> Option<&i32> {
@@ -57,20 +57,20 @@ impl Branch {
         if let Some(ref mut t) = self.0 {
             t.set(k, v);
         } else {
-            let t = Tree {
+            let t = Node {
                 key: k,
                 value: v,
-                left: Branch::new(),
-                right: Branch::new(),
+                left: Tree::new(),
+                right: Tree::new(),
             };
-            *self = Branch(Some(Box::new(t)));
+            *self = Tree(Some(Box::new(t)));
         }
     }
 }
 
 #[test]
 fn set_get_missing() {
-    let mut t = Tree::new(0, 0);
+    let mut t = Tree::new();
     t.set(1, 2);
     let v = t.get(3);
     assert_eq!(v, None);
@@ -78,14 +78,14 @@ fn set_get_missing() {
 
 #[test]
 fn set_get_1() {
-    let mut t = Tree::new(0, 0);
+    let mut t = Tree::new();
     t.set(1, 41);
     assert_eq!(t.get(1).unwrap(), &41);
 }
 
 #[test]
 fn set_get_1_1() {
-    let mut t = Tree::new(0, 0);
+    let mut t = Tree::new();
     t.set(1, 42);
     t.set(1, 41);
     assert_eq!(t.get(1).unwrap(), &41);
@@ -93,7 +93,7 @@ fn set_get_1_1() {
 
 #[test]
 fn set_get_1_2() {
-    let mut t = Tree::new(0, 0);
+    let mut t = Tree::new();
     t.set(1, 41);
     t.set(2, 42);
     assert_eq!(t.get(1).unwrap(), &41);
@@ -102,7 +102,7 @@ fn set_get_1_2() {
 
 #[test]
 fn set_get_1_3_2() {
-    let mut t = Tree::new(0, 0);
+    let mut t = Tree::new();
     t.set(1, 41);
     t.set(3, 43);
     t.set(2, 42);
