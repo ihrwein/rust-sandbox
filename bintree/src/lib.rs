@@ -1,64 +1,76 @@
 #[derive(Debug)]
-pub struct Tree(Option<Box<TreeNode>>);
-
-#[derive(Debug)]
-struct TreeNode {
+pub struct Tree {
     key: i32,
     value: i32,
-    left: Tree,
-    right: Tree,
+    left: Branch,
+    right: Branch,
 }
 
 impl Tree {
-    pub fn new() -> Tree {
-        Tree(None)
+    pub fn new(k: i32, v: i32) -> Tree {
+        Tree {
+            key: k,
+            value: v,
+            left: Branch::new(),
+            right: Branch::new(),
+        }
     }
 
     pub fn get(&self, k: i32) -> Option<&i32> {
-        self.0.as_ref().map_or(None, |n| {
-            if k == n.key {
-                Some(&n.value)
-            } else if k < n.key {
-                n.left.get(k)
-            } else {
-                n.right.get(k)
-            }
-        })
+        if k == self.key {
+            Some(&self.value)
+        } else if k < self.key {
+            self.left.get(k)
+        } else {
+            self.right.get(k)
+        }
     }
 
     pub fn set(&mut self, k: i32, v: i32) {
-        match self.0 {
-            None => {
-                let n = TreeNode {
-                    key: k,
-                    value: v,
-                    left: Tree::new(),
-                    right: Tree::new(),
-                };
-                self.0 = Some(Box::new(n));
-            }
-            Some(ref mut n) => {
-                if k == n.key {
-                    n.value = v
-                } else if k < n.key {
-                    n.left.set(k, v)
-                } else {
-                    n.right.set(k, v)
-                }
-            }
+        if k == self.key {
+            self.value = v
+        } else if k < self.key {
+            self.left.set(k, v)
+        } else {
+            self.right.set(k, v)
+        }
+    }
+}
+
+#[derive(Debug)]
+struct Branch(Option<Box<Tree>>);
+
+impl Branch {
+    fn new() -> Branch {
+        Branch(None)
+    }
+
+    fn get(&self, k: i32) -> Option<&i32> {
+        if let Some(ref t) = self.0 {
+            t.get(k)
+        } else {
+            None
+        }
+    }
+
+    fn set(&mut self, k: i32, v: i32) {
+        if let Some(ref mut t) = self.0 {
+            t.set(k, v);
+        } else {
+            let t = Tree {
+                key: k,
+                value: v,
+                left: Branch::new(),
+                right: Branch::new(),
+            };
+            *self = Branch(Some(Box::new(t)));
         }
     }
 }
 
 #[test]
-fn new_empty() {
-    let t = Tree::new();
-    assert_eq!(t.get(0), None);
-}
-
-#[test]
 fn set_get_missing() {
-    let mut t = Tree::new();
+    let mut t = Tree::new(0, 0);
     t.set(1, 2);
     let v = t.get(3);
     assert_eq!(v, None);
@@ -66,14 +78,14 @@ fn set_get_missing() {
 
 #[test]
 fn set_get_1() {
-    let mut t = Tree::new();
+    let mut t = Tree::new(0, 0);
     t.set(1, 41);
     assert_eq!(t.get(1).unwrap(), &41);
 }
 
 #[test]
 fn set_get_1_1() {
-    let mut t = Tree::new();
+    let mut t = Tree::new(0, 0);
     t.set(1, 42);
     t.set(1, 41);
     assert_eq!(t.get(1).unwrap(), &41);
@@ -81,7 +93,7 @@ fn set_get_1_1() {
 
 #[test]
 fn set_get_1_2() {
-    let mut t = Tree::new();
+    let mut t = Tree::new(0, 0);
     t.set(1, 41);
     t.set(2, 42);
     assert_eq!(t.get(1).unwrap(), &41);
@@ -90,7 +102,7 @@ fn set_get_1_2() {
 
 #[test]
 fn set_get_1_3_2() {
-    let mut t = Tree::new();
+    let mut t = Tree::new(0, 0);
     t.set(1, 41);
     t.set(3, 43);
     t.set(2, 42);
