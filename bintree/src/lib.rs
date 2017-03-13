@@ -57,13 +57,13 @@ impl Tree {
         if let Some(ref mut t) = self.0 {
             t.set(k, v);
         } else {
-            let t = Node {
+            let n = Node {
                 key: k,
                 value: v,
                 left: Tree::new(),
                 right: Tree::new(),
             };
-            *self = Tree(Some(Box::new(t)));
+            *self = Tree(Some(Box::new(n)));
         }
     }
 }
